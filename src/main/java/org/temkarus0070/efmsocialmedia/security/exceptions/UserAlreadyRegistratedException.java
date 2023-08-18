@@ -1,4 +1,4 @@
-package org.temkarus0070.efmsocialmedia.security.persistence.exceptions;
+package org.temkarus0070.efmsocialmedia.security.exceptions;
 
 import org.springframework.security.core.AuthenticationException;
 

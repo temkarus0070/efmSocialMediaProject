@@ -11,11 +11,11 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.temkarus0070.efmsocialmedia.security.persistence.dto.JwtAuthDto;
+import org.temkarus0070.efmsocialmedia.security.dto.JwtAuthDto;
+import org.temkarus0070.efmsocialmedia.security.exceptions.UserAlreadyRegistratedException;
 import org.temkarus0070.efmsocialmedia.security.persistence.entities.AuthToken;
 import org.temkarus0070.efmsocialmedia.security.persistence.entities.AuthTokenId;
 import org.temkarus0070.efmsocialmedia.security.persistence.entities.User;
-import org.temkarus0070.efmsocialmedia.security.persistence.exceptions.UserAlreadyRegistratedException;
 import org.temkarus0070.efmsocialmedia.security.persistence.repository.TokenRepository;
 import org.temkarus0070.efmsocialmedia.security.persistence.repository.UserRepository;
 

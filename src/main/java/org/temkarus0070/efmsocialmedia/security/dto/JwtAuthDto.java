@@ -1,4 +1,4 @@
-package org.temkarus0070.efmsocialmedia.security.persistence.dto;
+package org.temkarus0070.efmsocialmedia.security.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

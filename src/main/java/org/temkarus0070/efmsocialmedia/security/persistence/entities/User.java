@@ -1,5 +1,6 @@
 package org.temkarus0070.efmsocialmedia.security.persistence.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -26,6 +27,7 @@ public class User {
 
     private String password;
 
+    @JsonIgnore
     private boolean enabled = true;
 
     public User(String username) {
