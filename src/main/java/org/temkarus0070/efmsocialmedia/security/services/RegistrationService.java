@@ -3,11 +3,7 @@ package org.temkarus0070.efmsocialmedia.security.services;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
-import org.springframework.security.oauth2.jwt.JwsHeader;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,9 +11,9 @@ import org.temkarus0070.efmsocialmedia.security.dto.JwtAuthDto;
 import org.temkarus0070.efmsocialmedia.security.exceptions.UserAlreadyRegistratedException;
 import org.temkarus0070.efmsocialmedia.security.persistence.entities.AuthToken;
 import org.temkarus0070.efmsocialmedia.security.persistence.entities.AuthTokenId;
-import org.temkarus0070.efmsocialmedia.security.persistence.entities.User;
+import org.temkarus0070.efmsocialmedia.security.persistence.entities.UserAccount;
 import org.temkarus0070.efmsocialmedia.security.persistence.repository.TokenRepository;
-import org.temkarus0070.efmsocialmedia.security.persistence.repository.UserRepository;
+import org.temkarus0070.efmsocialmedia.security.persistence.repository.UserAccountRepository;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -30,18 +26,18 @@ import java.util.Optional;
 public class RegistrationService {
 
     private JwtEncoder jwtEncoder;
-    private UserRepository userRepository;
+    private UserAccountRepository userAccountRepository;
 
     private TokenRepository tokenRepository;
 
     private PasswordEncoder passwordEncoder;
 
     @Transactional
-    public AuthToken registrateUser(User user) {
-        if (!userRepository.existsUsersByEmailOrUsername(user.getEmail(), user.getUsername())) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            userRepository.save(user);
-            return registrateToken(user.getUsername());
+    public AuthToken registrateUser(UserAccount userAccount) {
+        if (!userAccountRepository.existsUsersByEmailOrUsername(userAccount.getEmail(), userAccount.getUsername())) {
+            userAccount.setPassword(passwordEncoder.encode(userAccount.getPassword()));
+            userAccountRepository.save(userAccount);
+            return registrateToken(userAccount.getUsername());
         } else {
             throw new UserAlreadyRegistratedException("пользователь с таким именем или почтой уже зарегистрирован");
         }
@@ -52,7 +48,7 @@ public class RegistrationService {
         Jwt token = generateJwt(username);
         Jwt refreshToken = generateRefreshJwt(username);
         AuthToken authToken =
-            new AuthToken(new AuthTokenId(token.getTokenValue(), refreshToken.getTokenValue()), new User(username));
+                new AuthToken(new AuthTokenId(token.getTokenValue(), refreshToken.getTokenValue()), new UserAccount(username));
         tokenRepository.save(authToken);
         return authToken;
 
@@ -87,12 +83,12 @@ public class RegistrationService {
         Optional<AuthToken> tokenOptional = tokenRepository.findById(new AuthTokenId(jwt.getToken(), jwt.getRefreshToken()));
         if (tokenOptional.isPresent()) {
             AuthToken oldAuthToken = tokenOptional.get();
-            Jwt token = generateJwt(oldAuthToken.getUser()
-                                                .getUsername());
-            Jwt refreshToken = generateRefreshJwt(oldAuthToken.getUser()
-                                                              .getUsername());
+            Jwt token = generateJwt(oldAuthToken.getUserAccount()
+                    .getUsername());
+            Jwt refreshToken = generateRefreshJwt(oldAuthToken.getUserAccount()
+                    .getUsername());
             AuthToken newToken =
-                new AuthToken(new AuthTokenId(token.getTokenValue(), refreshToken.getTokenValue()), oldAuthToken.getUser());
+                    new AuthToken(new AuthTokenId(token.getTokenValue(), refreshToken.getTokenValue()), oldAuthToken.getUserAccount());
             tokenRepository.save(newToken);
             tokenRepository.deleteById(oldAuthToken.getId());
             return newToken;

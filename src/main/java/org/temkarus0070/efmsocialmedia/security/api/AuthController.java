@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.temkarus0070.efmsocialmedia.security.dto.ErrorDto;
 import org.temkarus0070.efmsocialmedia.security.dto.JwtAuthDto;
-import org.temkarus0070.efmsocialmedia.security.persistence.entities.User;
+import org.temkarus0070.efmsocialmedia.security.persistence.entities.UserAccount;
 import org.temkarus0070.efmsocialmedia.security.services.RegistrationService;
 
 @RestController
@@ -23,12 +23,12 @@ public class AuthController {
 
     @PostMapping("/registrate")
     @Operation(operationId = "registrate", description = "регистрация нового пользователя",
-               responses = {@ApiResponse(responseCode = "200", description = "Регистрация пользователя прошла успешно"),
-                   @ApiResponse(responseCode = "400", description = "неправильный ввод данных для регистрации",
-                                content = @Content(mediaType = "application/json",
-                                                   schema = @Schema(implementation = ErrorDto.class)))})
-    public JwtAuthDto registrate(@RequestBody User user) {
-        return new JwtAuthDto(registrationService.registrateUser(user));
+            responses = {@ApiResponse(responseCode = "200", description = "Регистрация пользователя прошла успешно"),
+                    @ApiResponse(responseCode = "400", description = "неправильный ввод данных для регистрации",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorDto.class)))})
+    public JwtAuthDto registrate(@RequestBody UserAccount userAccount) {
+        return new JwtAuthDto(registrationService.registrateUser(userAccount));
     }
 
     @PostMapping("/refresh-token")

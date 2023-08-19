@@ -21,7 +21,7 @@ public class AuthToken {
     private AuthTokenId id;
 
     @ManyToOne
-    private User user;
+    private UserAccount userAccount;
 
 }
 

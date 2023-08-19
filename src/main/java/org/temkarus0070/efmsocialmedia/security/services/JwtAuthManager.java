@@ -14,22 +14,22 @@ import org.springframework.security.oauth2.server.resource.InvalidBearerTokenExc
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.stereotype.Component;
-import org.temkarus0070.efmsocialmedia.security.persistence.entities.User;
-import org.temkarus0070.efmsocialmedia.security.persistence.repository.UserRepository;
+import org.temkarus0070.efmsocialmedia.security.persistence.entities.UserAccount;
+import org.temkarus0070.efmsocialmedia.security.persistence.repository.UserAccountRepository;
 
 import java.util.Optional;
 
 @Component
 public class JwtAuthManager implements AuthenticationProvider {
 
-    private UserRepository userRepository;
+    private UserAccountRepository userAccountRepository;
     private Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter = new JwtAuthenticationConverter();
 
     private JwtDecoder jwtDecoder;
 
 
-    public JwtAuthManager(UserRepository userRepository, JwtDecoder jwtDecoder) {
-        this.userRepository = userRepository;
+    public JwtAuthManager(UserAccountRepository userAccountRepository, JwtDecoder jwtDecoder) {
+        this.userAccountRepository = userAccountRepository;
         this.jwtDecoder = jwtDecoder;
     }
 
@@ -39,10 +39,10 @@ public class JwtAuthManager implements AuthenticationProvider {
         try {
             Jwt decode = jwtDecoder.decode(token.getToken());
             String username = (String) decode.getClaimAsString("sub");
-            Optional<User> userOptional = userRepository.findByUsername(username);
+            Optional<UserAccount> userOptional = userAccountRepository.findById(username);
             if (userOptional.isPresent()) {
-                User user = userOptional.get();
-                if (user.isEnabled()) {
+                UserAccount userAccount = userOptional.get();
+                if (userAccount.isEnabled()) {
                     AbstractAuthenticationToken convert = jwtAuthenticationConverter.convert(decode);
                     return convert;
                 } else {

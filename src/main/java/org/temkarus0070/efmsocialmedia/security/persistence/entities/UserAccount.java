@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class UserAccount {
 
     @Id
     @Column(unique = true)
@@ -25,12 +25,13 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @JsonIgnore
     private String password;
 
     @JsonIgnore
     private boolean enabled = true;
 
-    public User(String username) {
+    public UserAccount(String username) {
         this.username = username;
     }
 }
