@@ -24,8 +24,10 @@ public class Relationship {
     private User friendRequester;
     @ManyToOne
     @MapsId("friendUsername")
+    @JsonIgnore
     private User friend;
 
-    private boolean friendshipAccepted;
+    private boolean confirmedFriend;
+    private boolean subscribe;
 }
 
