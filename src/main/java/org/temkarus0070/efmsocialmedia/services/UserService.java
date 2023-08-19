@@ -61,12 +61,14 @@ public class UserService {
         Optional<Relationship> friendshipRequestFromFriendOptional = relationshipRepository.findById(new RelationshipId(friendUsername, currentUser.getName()));
         Optional<Relationship> friendshipRequestToFriendOptional = relationshipRepository.findById(new RelationshipId(currentUser.getName(), friendUsername));
         if (friendshipRequestToFriendOptional.isPresent()) {
-            if (doSubscriberIfFriend(friendshipRequestFromFriendOptional.get(), friendshipRequestToFriendOptional.get())) {
+            if (friendshipRequestFromFriendOptional.isPresent() && doSubscriberIfFriend(friendshipRequestFromFriendOptional.get(),
+                    friendshipRequestToFriendOptional.get())) {
                 return;
             }
             relationshipRepository.deleteAllById(List.of(new RelationshipId(currentUser.getName(), friendUsername),
                     new RelationshipId(friendUsername, currentUser.getName())));
         } else throw new EntityNotFoundException("Не найден запрос на дружбу");
+
     }
 
     private boolean doSubscriberIfFriend(Relationship friendshipRequestFromFriend, Relationship friendshipRequestToFriend) {
