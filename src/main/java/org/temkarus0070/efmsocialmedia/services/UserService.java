@@ -113,4 +113,12 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public List<String> getSubscribeWithFriendsList() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return relationshipRepository.findRelationshipsByIdFriendRequesterUsernameAndSubscribeTrue(authentication.getName())
+                .stream()
+                .map(e -> e.getId().getFriendRequesterUsername())
+                .collect(Collectors.toList());
+    }
+
 }

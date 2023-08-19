@@ -16,6 +16,7 @@ public class PostController {
         return postService.get(postId);
     }
 
+
     @PostMapping
     public Post create(@RequestBody Post post) {
         return postService.create(post);
