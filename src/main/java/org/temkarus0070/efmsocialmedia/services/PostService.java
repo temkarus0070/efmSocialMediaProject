@@ -24,7 +24,7 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    @PostAuthorize("")
+    @PostAuthorize("#returnObject.author.username == authentication.name")
     public Post edit(Post updatedPost) {
         Optional<Post> postToEditOptional = postRepository.findById(updatedPost.getId());
 
@@ -36,7 +36,7 @@ public class PostService {
         throw new EntityNotFoundException("Не найден пост для редактирования");
     }
 
-    @PostAuthorize("")
+    @PostAuthorize("#returnObject.author.username == authentication.name")
     public Post addImage(long postId, byte[] image) {
         Optional<Post> postToEditOptional = postRepository.findById(postId);
 
@@ -56,7 +56,7 @@ public class PostService {
         throw new EntityNotFoundException("Пост не найден");
     }
 
-    @PostAuthorize("")
+    @PostAuthorize("#returnObject.author.username == authentication.name")
     public Post remove(long postId) {
         Optional<Post> optionalPost = postRepository.findById(postId);
         if (optionalPost.isPresent()) {
