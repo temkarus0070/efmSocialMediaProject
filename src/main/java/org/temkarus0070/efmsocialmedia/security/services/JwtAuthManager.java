@@ -54,10 +54,6 @@ public class JwtAuthManager implements AuthenticationProvider {
         } catch (JwtException jwtException) {
             throw new InvalidBearerTokenException("Неверное значение токена авторизации");
         }
-
-        //            if (jwtException.getErrors().stream().anyMatch(e->e.getDescription().contains("Jwt expired at"))) {
-        //
-        //            }
     }
 
 
