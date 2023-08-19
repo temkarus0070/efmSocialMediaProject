@@ -46,7 +46,7 @@ public class UserController {
 
     @PostMapping("/{friendUsername}/remove-my-friend-request")
     public void removeMyFriendRequest(@PathVariable String friendUsername) {
-        userService.removeFriendRequest(friendUsername);
+        userService.removeFriend(friendUsername);
     }
 
 

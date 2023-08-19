@@ -56,7 +56,7 @@ public class UserService {
     }
 
     @Transactional
-    public void removeFriendRequest(String friendUsername) {
+    public void removeFriend(String friendUsername) {
         Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
         Optional<Relationship> friendshipRequestFromFriendOptional = relationshipRepository.findById(new RelationshipId(friendUsername, currentUser.getName()));
         Optional<Relationship> friendshipRequestToFriendOptional = relationshipRepository.findById(new RelationshipId(currentUser.getName(), friendUsername));
