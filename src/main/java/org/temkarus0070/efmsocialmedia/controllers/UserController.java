@@ -27,6 +27,11 @@ public class UserController {
         return userService.getSubscribeList();
     }
 
+    @GetMapping("/incoming-requests")
+    public List<String> getIncomingFriendRequests() {
+        return userService.getFriendsRequestsList();
+    }
+
     @PostMapping("/{friendUsername}/add-friend")
     public void sendFriendRequest(@PathVariable String friendUsername) {
         userService.sendFriendRequest(friendUsername);
