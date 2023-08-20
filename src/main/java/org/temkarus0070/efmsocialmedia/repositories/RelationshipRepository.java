@@ -20,6 +20,10 @@ public interface RelationshipRepository extends JpaRepository<Relationship, Rela
 
     public List<Relationship> findRelationshipsByIdFriendRequesterUsernameAndConfirmedFriendFalseAndSubscribeFalse(String friendRequesterUsername);
 
-    @Query(value = "from Relationship r where r.id.friendUsername=:username and not exists(select f from Relationship f where f.id.friendRequesterUsername=:username)")
+    public boolean existsRelationshipByConfirmedFriendIsTrueAndIdFriendRequesterUsernameAndIdFriendUsername(String userNameToCheck,
+                                                                                                            String friendUsername);
+
+    @Query(
+        value = "from Relationship r where r.id.friendUsername=:username and not exists(select f from Relationship f where f.id.friendRequesterUsername=:username)")
     public List<Relationship> findUserSubscribers(@Param("username") String friendRequesterUsername);
 }

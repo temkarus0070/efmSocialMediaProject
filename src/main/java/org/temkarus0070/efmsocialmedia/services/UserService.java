@@ -18,57 +18,50 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class UserService {
+
     private RelationshipRepository relationshipRepository;
     private UserRepository userRepository;
 
-    @Transactional
-    public void sendFriendRequest(String friendUsername) {
-        Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
-        if (userRepository.existsById(friendUsername)) {
-
-            Relationship relationshipToFriend = new Relationship(new RelationshipId(currentUser.getName(), friendUsername), null, null, false, true);
-            Relationship relationshipFromFriend = new Relationship(new RelationshipId(friendUsername, currentUser.getName()), null, null, false, false);
-            relationshipRepository.saveAll(List.of(relationshipToFriend, relationshipFromFriend));
-        } else throw new EntityNotFoundException("Не найден пользователь с таким именем");
+    public List<String> getFriendList() {
+        Authentication authentication = SecurityContextHolder.getContext()
+                                                             .getAuthentication();
+        return relationshipRepository.findRelationshipsByIdFriendRequesterUsernameAndConfirmedFriendTrue(authentication.getName())
+                                     .stream()
+                                     .map(e -> e.getId()
+                                                .getFriendUsername())
+                                     .collect(Collectors.toList());
     }
 
-    @Transactional
-    public void acceptFriendRequest(String friendUsername) {
-        Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
-        Optional<Relationship> friendshipRequest = relationshipRepository.findById(new RelationshipId(friendUsername, currentUser.getName()));
-        if (friendshipRequest.isPresent()) {
-            Relationship relationshipFromFriend = friendshipRequest.get();
-            relationshipFromFriend.setConfirmedFriend(true);
-            relationshipFromFriend.setSubscribe(true);
-            Relationship relationshipToFriend = new Relationship(new RelationshipId(currentUser.getName(), friendUsername), null, null, true, true);
-            relationshipRepository.save(relationshipToFriend);
-            relationshipRepository.saveAll(List.of(relationshipToFriend, relationshipFromFriend));
-        } else throw new EntityNotFoundException("Не найден запрос на дружбу");
+    public List<String> getFriendsRequestsList() {
+        Authentication authentication = SecurityContextHolder.getContext()
+                                                             .getAuthentication();
+        return relationshipRepository.findRelationshipsByIdFriendRequesterUsernameAndConfirmedFriendFalseAndSubscribeFalse(
+                                         authentication.getName())
+                                     .stream()
+                                     .map(e -> e.getId()
+                                                .getFriendUsername())
+                                     .collect(Collectors.toList());
     }
 
-    @Transactional
-    public void declineFriendRequest(String friendUsername) {
-        Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
-        Optional<Relationship> friendshipRequest = relationshipRepository.findById(new RelationshipId(friendUsername, currentUser.getName()));
-        if (friendshipRequest.isPresent()) {
-            relationshipRepository.deleteById(new RelationshipId(currentUser.getName(), friendUsername));
-        } else throw new EntityNotFoundException("Не найден запрос на дружбу");
+    public List<String> getSubscribersList() {
+        Authentication authentication = SecurityContextHolder.getContext()
+                                                             .getAuthentication();
+        return relationshipRepository.findUserSubscribers(authentication.getName())
+                                     .stream()
+                                     .map(e -> e.getId()
+                                                .getFriendRequesterUsername())
+                                     .collect(Collectors.toList());
     }
 
-    @Transactional
-    public void removeFriend(String friendUsername) {
-        Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
-        Optional<Relationship> friendshipRequestFromFriendOptional = relationshipRepository.findById(new RelationshipId(friendUsername, currentUser.getName()));
-        Optional<Relationship> friendshipRequestToFriendOptional = relationshipRepository.findById(new RelationshipId(currentUser.getName(), friendUsername));
-        if (friendshipRequestToFriendOptional.isPresent()) {
-            if (friendshipRequestFromFriendOptional.isPresent() && doSubscriberIfFriend(friendshipRequestFromFriendOptional.get(),
-                    friendshipRequestToFriendOptional.get())) {
-                return;
-            }
-            relationshipRepository.deleteAllById(List.of(new RelationshipId(currentUser.getName(), friendUsername),
-                    new RelationshipId(friendUsername, currentUser.getName())));
-        } else throw new EntityNotFoundException("Не найден запрос на дружбу");
-
+    public List<String> getSubscribeList() {
+        Authentication authentication = SecurityContextHolder.getContext()
+                                                             .getAuthentication();
+        return relationshipRepository.findRelationshipsByIdFriendRequesterUsernameAndConfirmedFriendFalseAndSubscribeTrue(
+                                         authentication.getName())
+                                     .stream()
+                                     .map(e -> e.getId()
+                                                .getFriendRequesterUsername())
+                                     .collect(Collectors.toList());
     }
 
     private boolean doSubscriberIfFriend(Relationship friendshipRequestFromFriend, Relationship friendshipRequestToFriend) {
@@ -82,43 +75,91 @@ public class UserService {
         return false;
     }
 
-    public List<String> getFriendList() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return relationshipRepository.findRelationshipsByIdFriendRequesterUsernameAndConfirmedFriendTrue(authentication.getName())
-                .stream().map(e -> e.getId().getFriendUsername())
-                .collect(Collectors.toList());
-    }
-
-    public List<String> getFriendsRequestsList() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return relationshipRepository.findRelationshipsByIdFriendRequesterUsernameAndConfirmedFriendFalseAndSubscribeFalse(authentication.getName())
-                .stream().map(e -> e.getId().getFriendUsername())
-                .collect(Collectors.toList());
-    }
-
-
-    public List<String> getSubscribersList() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return relationshipRepository.findUserSubscribers(authentication.getName())
-                .stream()
-                .map(e -> e.getId().getFriendRequesterUsername())
-                .collect(Collectors.toList());
-    }
-
-    public List<String> getSubscribeList() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return relationshipRepository.findRelationshipsByIdFriendRequesterUsernameAndConfirmedFriendFalseAndSubscribeTrue(authentication.getName())
-                .stream()
-                .map(e -> e.getId().getFriendRequesterUsername())
-                .collect(Collectors.toList());
-    }
-
     public List<String> getSubscribeWithFriendsList() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext()
+                                                             .getAuthentication();
         return relationshipRepository.findRelationshipsByIdFriendRequesterUsernameAndSubscribeTrue(authentication.getName())
-                .stream()
-                .map(e -> e.getId().getFriendRequesterUsername())
-                .collect(Collectors.toList());
+                                     .stream()
+                                     .map(e -> e.getId()
+                                                .getFriendRequesterUsername())
+                                     .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void sendFriendRequest(String friendUsername) {
+        Authentication currentUser = SecurityContextHolder.getContext()
+                                                          .getAuthentication();
+        if (userRepository.existsById(friendUsername)) {
+
+            Relationship relationshipToFriend =
+                new Relationship(new RelationshipId(currentUser.getName(), friendUsername), null, null, false, true);
+            Relationship relationshipFromFriend =
+                new Relationship(new RelationshipId(friendUsername, currentUser.getName()), null, null, false, false);
+            relationshipRepository.saveAll(List.of(relationshipToFriend, relationshipFromFriend));
+        } else {
+            throw new EntityNotFoundException("Не найден пользователь с таким именем");
+        }
+    }
+
+    @Transactional
+    public void acceptFriendRequest(String friendUsername) {
+        Authentication currentUser = SecurityContextHolder.getContext()
+                                                          .getAuthentication();
+        Optional<Relationship> friendshipRequest =
+            relationshipRepository.findById(new RelationshipId(friendUsername, currentUser.getName()));
+        if (friendshipRequest.isPresent()) {
+            Relationship relationshipFromFriend = friendshipRequest.get();
+            relationshipFromFriend.setConfirmedFriend(true);
+            relationshipFromFriend.setSubscribe(true);
+            Relationship relationshipToFriend =
+                new Relationship(new RelationshipId(currentUser.getName(), friendUsername), null, null, true, true);
+            relationshipRepository.save(relationshipToFriend);
+            relationshipRepository.saveAll(List.of(relationshipToFriend, relationshipFromFriend));
+        } else {
+            throw new EntityNotFoundException("Не найден запрос на дружбу");
+        }
+    }
+
+    @Transactional
+    public void declineFriendRequest(String friendUsername) {
+        Authentication currentUser = SecurityContextHolder.getContext()
+                                                          .getAuthentication();
+        Optional<Relationship> friendshipRequest =
+            relationshipRepository.findById(new RelationshipId(friendUsername, currentUser.getName()));
+        if (friendshipRequest.isPresent()) {
+            relationshipRepository.deleteById(new RelationshipId(currentUser.getName(), friendUsername));
+        } else {
+            throw new EntityNotFoundException("Не найден запрос на дружбу");
+        }
+    }
+
+    @Transactional
+    public void removeFriend(String friendUsername) {
+        Authentication currentUser = SecurityContextHolder.getContext()
+                                                          .getAuthentication();
+        Optional<Relationship> friendshipRequestFromFriendOptional =
+            relationshipRepository.findById(new RelationshipId(friendUsername, currentUser.getName()));
+        Optional<Relationship> friendshipRequestToFriendOptional =
+            relationshipRepository.findById(new RelationshipId(currentUser.getName(), friendUsername));
+        if (friendshipRequestToFriendOptional.isPresent()) {
+            if (friendshipRequestFromFriendOptional.isPresent() && doSubscriberIfFriend(friendshipRequestFromFriendOptional.get(),
+                                                                                        friendshipRequestToFriendOptional.get())) {
+                return;
+            }
+            relationshipRepository.deleteAllById(List.of(new RelationshipId(currentUser.getName(), friendUsername),
+                                                         new RelationshipId(friendUsername, currentUser.getName())));
+        } else {
+            throw new EntityNotFoundException("Не найден запрос на дружбу");
+        }
+
+    }
+
+    public boolean hasFriend(String friendUsername) {
+        Authentication authentication = SecurityContextHolder.getContext()
+                                                             .getAuthentication();
+        return relationshipRepository.existsRelationshipByConfirmedFriendIsTrueAndIdFriendRequesterUsernameAndIdFriendUsername(
+            authentication.getName(),
+            friendUsername);
     }
 
 }
