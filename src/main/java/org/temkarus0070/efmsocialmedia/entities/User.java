@@ -1,6 +1,10 @@
 package org.temkarus0070.efmsocialmedia.entities;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +27,7 @@ public class User {
     @OneToMany(mappedBy = "author")
     private List<Post> posts;
 
-    @OneToMany(mappedBy = "friendRequester")
-    private List<Relationship> friends;
+    public User(String username) {
+        this.username = username;
+    }
 }

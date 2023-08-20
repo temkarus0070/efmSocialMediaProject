@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.temkarus0070.efmsocialmedia.entities.Relationship;
 import org.temkarus0070.efmsocialmedia.entities.RelationshipId;
+import org.temkarus0070.efmsocialmedia.entities.User;
 import org.temkarus0070.efmsocialmedia.repositories.RelationshipRepository;
 import org.temkarus0070.efmsocialmedia.repositories.UserRepository;
 
@@ -60,7 +61,7 @@ public class UserService {
                                          authentication.getName())
                                      .stream()
                                      .map(e -> e.getId()
-                                                .getFriendRequesterUsername())
+                                                .getFriendUsername())
                                      .collect(Collectors.toList());
     }
 
@@ -85,16 +86,23 @@ public class UserService {
                                      .collect(Collectors.toList());
     }
 
+    //TODO check if has request
     @Transactional
     public void sendFriendRequest(String friendUsername) {
         Authentication currentUser = SecurityContextHolder.getContext()
                                                           .getAuthentication();
         if (userRepository.existsById(friendUsername)) {
 
-            Relationship relationshipToFriend =
-                new Relationship(new RelationshipId(currentUser.getName(), friendUsername), null, null, false, true);
-            Relationship relationshipFromFriend =
-                new Relationship(new RelationshipId(friendUsername, currentUser.getName()), null, null, false, false);
+            Relationship relationshipToFriend = new Relationship(new RelationshipId(currentUser.getName(), friendUsername),
+                                                                 new User(currentUser.getName()),
+                                                                 new User(friendUsername),
+                                                                 false,
+                                                                 true);
+            Relationship relationshipFromFriend = new Relationship(new RelationshipId(friendUsername, currentUser.getName()),
+                                                                   new User(friendUsername),
+                                                                   new User(currentUser.getName()),
+                                                                   false,
+                                                                   false);
             relationshipRepository.saveAll(List.of(relationshipToFriend, relationshipFromFriend));
         } else {
             throw new EntityNotFoundException("Не найден пользователь с таким именем");

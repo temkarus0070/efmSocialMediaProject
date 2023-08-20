@@ -15,7 +15,9 @@ import java.util.List;
 public interface MessagesRepository extends JpaRepository<Message, MessageId> {
 
     @Query(value = """
-                   SELECT distinct new DialogDto(case when m.id.senderUsername=:currentUsername then m.id.destinationUsername else m.id.senderUsername) 
+                   SELECT distinct new org.temkarus0070.efmsocialmedia.dto.DialogDto(case when m.id.senderUsername=:currentUsername
+                    then m.id.destinationUsername 
+                    else m.id.senderUsername END ) 
                    from Message m
                     where m.id.senderUsername=:currentUsername or m.id.destinationUsername=:currentUsername
                    """)
