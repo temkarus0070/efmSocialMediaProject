@@ -39,6 +39,26 @@ public class PositiveCasesTest extends BaseFriendTest {
 
     }
 
+
+    @Test
+    public void testAddFriendlyUserAndRequestAccepted() throws Exception {
+        checkSuccessfulFriendshipRequestWasSent("temkarus0070", "pupkin777");
+        checkThatFriendshipRequesterDontHaveRequestButOtherPersonHave("temkarus0070", "pupkin777");
+        checkSuccessfulFriendshipRequestWasAccept("temkarus0070", "pupkin777");
+
+        checkThatPersonDontHaveAnyFriendshipRequest("pupkin777");
+
+        checkSuccessfulFriendshipRequestWasDeleted("temkarus0070", "pupkin777");
+
+        checkThatPersonDontHaveAnyFriendshipRequest("pupkin777");
+
+        checkThatFriendshipRequesterIsSubscriber("pupkin777", "temkarus0070");
+
+        checkThatDontHaveFriendsAndNotSubscribeToAnyone("temkarus0070");
+
+    }
+
+
     private void checkSuccessfulFriendshipRequestWasDeleted(String friendshipRequesterUsername, String friendName)
         throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete(String.format("/user/friend/%s", friendName))
@@ -163,24 +183,6 @@ public class PositiveCasesTest extends BaseFriendTest {
                                                        assert list.isEmpty();
                                                    }
                                                }));
-    }
-
-    @Test
-    public void testAddFriendlyUserAndRequestAccepted() throws Exception {
-        checkSuccessfulFriendshipRequestWasSent("temkarus0070", "pupkin777");
-        checkThatFriendshipRequesterDontHaveRequestButOtherPersonHave("temkarus0070", "pupkin777");
-        checkSuccessfulFriendshipRequestWasAccept("temkarus0070", "pupkin777");
-
-        checkThatPersonDontHaveAnyFriendshipRequest("pupkin777");
-
-        checkSuccessfulFriendshipRequestWasDeleted("temkarus0070", "pupkin777");
-
-        checkThatPersonDontHaveAnyFriendshipRequest("pupkin777");
-
-        checkThatFriendshipRequesterIsSubscriber("pupkin777", "temkarus0070");
-
-        checkThatDontHaveFriendsAndNotSubscribeToAnyone("temkarus0070");
-
     }
 
     private void checkSuccessfulFriendshipRequestWasAccept(String friendshipRequesterName, String friendName) throws Exception {
