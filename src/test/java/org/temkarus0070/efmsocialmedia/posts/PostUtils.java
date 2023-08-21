@@ -191,7 +191,6 @@ public class PostUtils {
         return imageId;
     }
 
-    //TODO 403 STATUS ADD
     public void checkPostNotSuccessEditedByNotAuthor(PostDto postDto, String otherPerson) throws Exception {
 
         long postId = postDto.getId();
@@ -210,7 +209,7 @@ public class PostUtils {
                                       .content(content)
                                       .with(user(otherPerson)))
                .andExpect(MockMvcResultMatchers.status()
-                                               .isBadRequest());
+                                               .isForbidden());
 
         mockMvc.perform(get(String.format("/post/%d", postId)))
                .andExpect(MockMvcResultMatchers.status()
@@ -303,7 +302,6 @@ public class PostUtils {
         return postDto;
     }
 
-    //TODO 403
     public void checkImageCantBeAddedByNotAuthor(PostDto postDto, String notAuthorName) throws Exception {
         long postId = postDto.getId();
         String contentAsString = mockMvc.perform(get(String.format("/post/%d", postId)))
@@ -318,60 +316,7 @@ public class PostUtils {
         mockMvc.perform(post(String.format("/post/%d/image", postId)).content(objectMapper.writeValueAsString(newImages.get(0)))
                                                                      .with(user(notAuthorName)))
                .andExpect(MockMvcResultMatchers.status()
-                                               .isBadRequest());
-
-        PostDto finalPostDto = postDto;
-        mockMvc.perform(get(String.format("/post/%d", postId)))
-               .andExpect(MockMvcResultMatchers.status()
-                                               .isOk())
-               .andExpect(MockMvcResultMatchers.content()
-                                               .string(new AssertionMatcher<>() {
-                                                   @SneakyThrows
-                                                   @Override
-                                                   public void assertion(String actual) throws AssertionError {
-                                                       PostDto updatedPost = objectMapper.readValue(actual, PostDto.class);
-                                                       assert updatedPost.getId() == postId;
-                                                       assert updatedPost.getCreated()
-                                                                         .equals(finalPostDto.getCreated());
-                                                       assert updatedPost.getText()
-                                                                         .equals(finalPostDto.getText());
-                                                       assert updatedPost.getHeader()
-                                                                         .equals(finalPostDto.getHeader());
-                                                       assert updatedPost.getAuthorName()
-                                                                         .equals(finalPostDto.getAuthorName());
-                                                       assert updatedPost.getImages()
-                                                                         .stream()
-                                                                         .anyMatch(e -> Arrays.equals(e.getContent(),
-                                                                                                      finalPostDto.getImages()
-                                                                                                                  .get(0)
-                                                                                                                  .getContent()));
-                                                       assert updatedPost.getImages()
-                                                                         .size() == finalPostDto.getImages()
-                                                                                                .size();
-                                                   }
-                                               }));
-    }    //TODO 403
-
-    public void checkImageCantBeRemovedByNotAuthor(PostDto postDto, String notAuthorName) throws Exception {
-        long postId = postDto.getId();
-        String contentAsString = mockMvc.perform(get(String.format("/post/%d", postId)))
-                                        .andExpect(MockMvcResultMatchers.status()
-                                                                        .isOk())
-                                        .andReturn()
-                                        .getResponse()
-                                        .getContentAsString();
-        postDto = objectMapper.readValue(contentAsString, PostDto.class);
-
-        List<ImageDto> newImages = createSomePost().getImages();
-        mockMvc.perform(delete(String.format("/post/%d/image/%d",
-                                             postId,
-                                             postDto.getImages()
-                                                    .stream()
-                                                    .findAny()
-                                                    .get()
-                                                    .getId())).with(user(notAuthorName)))
-               .andExpect(MockMvcResultMatchers.status()
-                                               .isBadRequest());
+                                               .isForbidden());
 
         PostDto finalPostDto = postDto;
         mockMvc.perform(get(String.format("/post/%d", postId)))
@@ -405,7 +350,59 @@ public class PostUtils {
                                                }));
     }
 
-    //TODO 404
+    public void checkImageCantBeRemovedByNotAuthor(PostDto postDto, String notAuthorName) throws Exception {
+        long postId = postDto.getId();
+        String contentAsString = mockMvc.perform(get(String.format("/post/%d", postId)))
+                                        .andExpect(MockMvcResultMatchers.status()
+                                                                        .isOk())
+                                        .andReturn()
+                                        .getResponse()
+                                        .getContentAsString();
+        postDto = objectMapper.readValue(contentAsString, PostDto.class);
+
+        List<ImageDto> newImages = createSomePost().getImages();
+        mockMvc.perform(delete(String.format("/post/%d/image/%d",
+                                             postId,
+                                             postDto.getImages()
+                                                    .stream()
+                                                    .findAny()
+                                                    .get()
+                                                    .getId())).with(user(notAuthorName)))
+               .andExpect(MockMvcResultMatchers.status()
+                                               .isForbidden());
+
+        PostDto finalPostDto = postDto;
+        mockMvc.perform(get(String.format("/post/%d", postId)))
+               .andExpect(MockMvcResultMatchers.status()
+                                               .isOk())
+               .andExpect(MockMvcResultMatchers.content()
+                                               .string(new AssertionMatcher<>() {
+                                                   @SneakyThrows
+                                                   @Override
+                                                   public void assertion(String actual) throws AssertionError {
+                                                       PostDto updatedPost = objectMapper.readValue(actual, PostDto.class);
+                                                       assert updatedPost.getId() == postId;
+                                                       assert updatedPost.getCreated()
+                                                                         .equals(finalPostDto.getCreated());
+                                                       assert updatedPost.getText()
+                                                                         .equals(finalPostDto.getText());
+                                                       assert updatedPost.getHeader()
+                                                                         .equals(finalPostDto.getHeader());
+                                                       assert updatedPost.getAuthorName()
+                                                                         .equals(finalPostDto.getAuthorName());
+                                                       assert updatedPost.getImages()
+                                                                         .stream()
+                                                                         .anyMatch(e -> Arrays.equals(e.getContent(),
+                                                                                                      finalPostDto.getImages()
+                                                                                                                  .get(0)
+                                                                                                                  .getContent()));
+                                                       assert updatedPost.getImages()
+                                                                         .size() == finalPostDto.getImages()
+                                                                                                .size();
+                                                   }
+                                               }));
+    }
+
     public void checkPostSuccessRemoved(long postId) throws Exception {
         mockMvc.perform(delete(String.format("/post/%d", postId)))
                .andExpect(MockMvcResultMatchers.status()
@@ -413,6 +410,6 @@ public class PostUtils {
 
         mockMvc.perform(get(String.format("/post/%d", postId)))
                .andExpect(MockMvcResultMatchers.status()
-                                               .isBadRequest());
+                                               .isNotFound());
     }
 }

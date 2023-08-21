@@ -7,12 +7,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -23,6 +25,7 @@ import org.temkarus0070.efmsocialmedia.security.services.JwtAuthManager;
 import org.temkarus0070.efmsocialmedia.security.services.RegistrationService;
 
 import java.io.IOException;
+import java.util.Set;
 
 @Configuration
 @EnableTransactionManagement(order = 0)
@@ -55,7 +58,9 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(options -> {
 
-                options.requestMatchers("/auth/registrate", "/auth/refresh-token", "/v3/api-docs/**",
+                options.requestMatchers("/auth/registrate",
+                                        "/auth/refresh-token",
+                                        "/v3/api-docs/**",
                                         "/swagger-ui/**",
                                         "/swagger-ui.html")
                        .permitAll()
@@ -91,10 +96,28 @@ public class SecurityConfig {
 
     private void writeExceptionWhenBadRequest(HttpServletRequest request, HttpServletResponse response, Exception authException)
         throws IOException, ServletException {
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(400);
-        response.setCharacterEncoding("UTF-8");
-        objectMapper.writeValue(response.getWriter(), new ErrorDto(authException.getLocalizedMessage()));
+        Set<String> authUrls = Set.of("/auth/registrate", "/auth/refresh-token", "/login");
+        String requestPath = request.getPathInfo();
+        if (authUrls.contains(requestPath)) {
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setStatus(400);
+            response.setCharacterEncoding("UTF-8");
+            objectMapper.writeValue(response.getWriter(), new ErrorDto(authException.getLocalizedMessage()));
+        } else if (authException.getClass()
+                                .equals(AccessDeniedException.class)) {
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setStatus(403);
+            response.setCharacterEncoding("UTF-8");
+            objectMapper.writeValue(response.getWriter(), new ErrorDto(authException.getLocalizedMessage()));
+
+        } else if (authException.getClass()
+                                .equals(AuthenticationException.class)) {
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setStatus(401);
+            response.setCharacterEncoding("UTF-8");
+            objectMapper.writeValue(response.getWriter(), new ErrorDto(authException.getLocalizedMessage()));
+        }
+
     }
 
 

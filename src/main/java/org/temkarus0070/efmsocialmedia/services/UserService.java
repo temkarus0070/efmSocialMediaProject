@@ -82,7 +82,7 @@ public class UserService {
         return relationshipRepository.findRelationshipsByIdFriendRequesterUsernameAndSubscribeTrue(authentication.getName())
                                      .stream()
                                      .map(e -> e.getId()
-                                                .getFriendRequesterUsername())
+                                                .getFriendUsername())
                                      .collect(Collectors.toList());
     }
 

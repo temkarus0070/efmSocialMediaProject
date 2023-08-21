@@ -1,16 +1,14 @@
 package org.temkarus0070.efmsocialmedia.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostDto {
@@ -21,4 +19,5 @@ public class PostDto {
     private LocalDateTime created;
     private List<ImageDto> images = new ArrayList<>();
     private String authorName;
+
 }

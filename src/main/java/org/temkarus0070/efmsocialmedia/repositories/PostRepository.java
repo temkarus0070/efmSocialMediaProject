@@ -1,7 +1,7 @@
 package org.temkarus0070.efmsocialmedia.repositories;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,5 +19,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT  p from Post p where p.id=:id")
     Optional<Post> findByIdEagerly(@Param("id") Long id);
 
-    public Page<Post> findAllByAuthor_UsernameIn(List<String> usernames, PageRequest pageable);
+    public Page<Post> findAllByAuthor_UsernameIn(List<String> usernames, Pageable pageable);
 }

@@ -20,7 +20,7 @@ public class NegativeCasesTest extends BaseFriendTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/user/friend/pup777/add-friend")
                                               .with(SecurityMockMvcRequestPostProcessors.user("temkarus0070")))
                .andExpect(MockMvcResultMatchers.status()
-                                               .isBadRequest());
+                                               .isNotFound());
     }
 
     @Test
@@ -28,7 +28,7 @@ public class NegativeCasesTest extends BaseFriendTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/user/friend/pup777/accept-friend")
                                               .with(SecurityMockMvcRequestPostProcessors.user("temkarus0070")))
                .andExpect(MockMvcResultMatchers.status()
-                                               .isBadRequest());
+                                               .isNotFound());
     }
 
     @Test
@@ -36,7 +36,7 @@ public class NegativeCasesTest extends BaseFriendTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/user/friend/pupkin777/accept-friend")
                                               .with(SecurityMockMvcRequestPostProcessors.user("temkarus0070")))
                .andExpect(MockMvcResultMatchers.status()
-                                               .isBadRequest());
+                                               .isNotFound());
     }
 
 }

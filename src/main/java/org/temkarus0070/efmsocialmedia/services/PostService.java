@@ -7,17 +7,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.temkarus0070.efmsocialmedia.dto.ImageDto;
 import org.temkarus0070.efmsocialmedia.dto.PostDto;
 import org.temkarus0070.efmsocialmedia.entities.Image;
 import org.temkarus0070.efmsocialmedia.entities.Post;
-import org.temkarus0070.efmsocialmedia.entities.User;
 import org.temkarus0070.efmsocialmedia.repositories.ImageRepository;
 import org.temkarus0070.efmsocialmedia.repositories.PostRepository;
+import org.temkarus0070.efmsocialmedia.utils.PostUtils;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -32,7 +30,7 @@ public class PostService {
         Authentication authentication = SecurityContextHolder.getContext()
                                                              .getAuthentication();
         postDto.setAuthorName(authentication.getName());
-        Post savedPost = postRepository.save(mapToPost(postDto));
+        Post savedPost = postRepository.save(PostUtils.mapToPost(postDto));
         postDto.setId(savedPost.getId());
         postDto.setCreated(savedPost.getCreated());
         return postDto;
@@ -69,7 +67,7 @@ public class PostService {
         Optional<Post> optionalPost = postRepository.findByIdEagerly(postId);
         if (optionalPost.isPresent()) {
             Post post = optionalPost.get();
-            return mapFromPost(post);
+            return PostUtils.mapFromPost(post);
         }
         throw new EntityNotFoundException("Пост не найден");
     }
@@ -82,46 +80,6 @@ public class PostService {
             return optionalPost.get();
         }
         throw new EntityNotFoundException("Пост не найден");
-    }
-
-    private PostDto mapFromPost(Post post) {
-        PostDto postDto = new PostDto();
-        postDto.setId(post.getId());
-        postDto.setCreated(post.getCreated());
-        postDto.setAuthorName(post.getAuthor()
-                                  .getUsername());
-        postDto.setHeader(post.getHeader());
-        postDto.setText(post.getText());
-        postDto.setImages(post.getImages()
-                              .stream()
-                              .map(e -> {
-                                  ImageDto imageDto = new ImageDto();
-                                  imageDto.setContent(e.getContent());
-                                  imageDto.setId(e.getId());
-                                  return imageDto;
-                              })
-                              .collect(Collectors.toList()));
-        return postDto;
-    }
-
-    private Post mapToPost(PostDto postDto) {
-        Post post = new Post();
-        post.setId(postDto.getId());
-        post.setCreated(postDto.getCreated());
-        post.setAuthor(new User(postDto.getAuthorName()));
-        post.setHeader(postDto.getHeader());
-        post.setText(postDto.getText());
-        post.setImages(postDto.getImages()
-                              .stream()
-                              .map(e -> {
-                                  Image imageDto = new Image();
-                                  imageDto.setContent(e.getContent());
-                                  imageDto.setId(e.getId());
-                                  imageDto.setPost(post);
-                                  return imageDto;
-                              })
-                              .collect(Collectors.toList()));
-        return post;
     }
 
     @PostAuthorize("returnObject.author.username == authentication.name")
