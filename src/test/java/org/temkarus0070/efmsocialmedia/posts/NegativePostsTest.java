@@ -3,60 +3,44 @@ package org.temkarus0070.efmsocialmedia.posts;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.temkarus0070.efmsocialmedia.BaseApiTest;
 import org.temkarus0070.efmsocialmedia.dto.PostDto;
 
-public class PostsTest extends BasePostTest {
+public class NegativePostsTest extends BaseApiTest {
 
     @Autowired
     private PostUtils postUtils;
 
     @Test
     @WithMockUser("temkarus0070")
-    public void testPostCreate() throws Exception {
-        PostDto postDto = postUtils.createSomePost();
-        postUtils.checkPostSuccessCreatedAndAddedToApp(postDto);
-    }
-
-    @Test
-    @WithMockUser("temkarus0070")
-    public void testPostRemove() throws Exception {
-        PostDto postDto = postUtils.createSomePost();
-        long postId = postUtils.checkPostSuccessCreatedAndAddedToApp(postDto);
-        postUtils.checkPostSuccessRemoved(postId);
-    }
-
-    @Test
-    @WithMockUser("temkarus0070")
-    public void testPostEdit() throws Exception {
+    public void testPostEditWhenNoRights() throws Exception {
 
         PostDto postDto = postUtils.createSomePost();
         long postId = postUtils.checkPostSuccessCreatedAndAddedToApp(postDto);
         postDto.setId(postId);
-        postUtils.checkPostSuccessEdited(postDto);
-
-    }
-
-
-    @Test
-    @WithMockUser("temkarus0070")
-    public void testImageAdding() throws Exception {
-
-        PostDto postDto = postUtils.createSomePost();
-        long postId = postUtils.checkPostSuccessCreatedAndAddedToApp(postDto);
-        postDto.setId(postId);
-        postUtils.checkImageSuccessfulAdded(postDto);
+        postUtils.checkPostNotSuccessEditedByNotAuthor(postDto, "pupkin777");
 
     }
 
     @Test
     @WithMockUser("temkarus0070")
-    public void testImageRemoving() throws Exception {
+    public void testImageAddWhenNoRights() throws Exception {
 
         PostDto postDto = postUtils.createSomePost();
         long postId = postUtils.checkPostSuccessCreatedAndAddedToApp(postDto);
         postDto.setId(postId);
-        long imageId = postUtils.checkImageSuccessfulAdded(postDto);
-        postUtils.checkImageSuccessfulRemoved(imageId, postId);
+        postUtils.checkImageCantBeAddedByNotAuthor(postDto, "pupkin777");
+
     }
 
+    @Test
+    @WithMockUser("temkarus0070")
+    public void testImageRemoveWhenNoRights() throws Exception {
+
+        PostDto postDto = postUtils.createSomePost();
+        long postId = postUtils.checkPostSuccessCreatedAndAddedToApp(postDto);
+        postDto.setId(postId);
+        postUtils.checkImageCantBeRemovedByNotAuthor(postDto, "pupkin777");
+
+    }
 }

@@ -10,11 +10,13 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.temkarus0070.efmsocialmedia.security.dto.ErrorDto;
 import org.temkarus0070.efmsocialmedia.security.dto.JwtAuthDto;
 import org.temkarus0070.efmsocialmedia.security.services.JwtAuthManager;
@@ -23,6 +25,8 @@ import org.temkarus0070.efmsocialmedia.security.services.RegistrationService;
 import java.io.IOException;
 
 @Configuration
+@EnableTransactionManagement(order = 0)
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private JwtAuthManager jwtAuthManager;
