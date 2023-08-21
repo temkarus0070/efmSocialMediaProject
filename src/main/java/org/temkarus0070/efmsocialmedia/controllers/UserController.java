@@ -48,10 +48,6 @@ public class UserController {
     }
 
 
-    @PostMapping("/{friendUsername}/decline-friend-request")
-    public void declineFriendRequest(@PathVariable String friendUsername) {
-        userService.declineFriendRequest(friendUsername);
-    }
 
 
     @DeleteMapping("/{friendUsername}")

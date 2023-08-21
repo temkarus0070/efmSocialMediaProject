@@ -86,7 +86,6 @@ public class UserService {
                                      .collect(Collectors.toList());
     }
 
-    //TODO check if has request
     @Transactional
     public void sendFriendRequest(String friendUsername) {
         Authentication currentUser = SecurityContextHolder.getContext()
@@ -103,6 +102,20 @@ public class UserService {
                                                                    new User(currentUser.getName()),
                                                                    false,
                                                                    false);
+            List<Relationship> alreadyExistedRelationships =
+                relationshipRepository.findAllById(List.of(relationshipToFriend.getId(), relationshipFromFriend.getId()));
+            if (alreadyExistedRelationships.size() == 2) {
+                throw new IllegalArgumentException("Вы уже друзья или ваша заявка еще в рассмотрении");
+            } else if (!alreadyExistedRelationships.isEmpty() && alreadyExistedRelationships.stream()
+                                                                                            .allMatch(r -> r.getId()
+                                                                                                            .equals(
+                                                                                                                relationshipFromFriend.getId()))) {
+                relationshipToFriend.setConfirmedFriend(true);
+                relationshipToFriend.setSubscribe(true);
+                relationshipFromFriend.setConfirmedFriend(true);
+            } else if (!alreadyExistedRelationships.isEmpty()) {
+                throw new IllegalArgumentException("Вы были отправлены в подписчики данным пользователем");
+            }
             relationshipRepository.saveAll(List.of(relationshipToFriend, relationshipFromFriend));
         } else {
             throw new EntityNotFoundException("Не найден пользователь с таким именем");
@@ -117,25 +130,15 @@ public class UserService {
             relationshipRepository.findById(new RelationshipId(friendUsername, currentUser.getName()));
         if (friendshipRequest.isPresent()) {
             Relationship relationshipFromFriend = friendshipRequest.get();
+            if (relationshipFromFriend.isConfirmedFriend()) {
+                throw new IllegalArgumentException("Вы уже в статусе друзей");
+            }
             relationshipFromFriend.setConfirmedFriend(true);
             relationshipFromFriend.setSubscribe(true);
             Relationship relationshipToFriend =
                 new Relationship(new RelationshipId(currentUser.getName(), friendUsername), null, null, true, true);
             relationshipRepository.save(relationshipToFriend);
             relationshipRepository.saveAll(List.of(relationshipToFriend, relationshipFromFriend));
-        } else {
-            throw new EntityNotFoundException("Не найден запрос на дружбу");
-        }
-    }
-
-    @Transactional
-    public void declineFriendRequest(String friendUsername) {
-        Authentication currentUser = SecurityContextHolder.getContext()
-                                                          .getAuthentication();
-        Optional<Relationship> friendshipRequest =
-            relationshipRepository.findById(new RelationshipId(friendUsername, currentUser.getName()));
-        if (friendshipRequest.isPresent()) {
-            relationshipRepository.deleteById(new RelationshipId(currentUser.getName(), friendUsername));
         } else {
             throw new EntityNotFoundException("Не найден запрос на дружбу");
         }
