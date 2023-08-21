@@ -15,4 +15,9 @@ public class ControllerErrorsAdvice {
         return new ResponseEntity<>(new ErrorDto(entityNotFoundException.getLocalizedMessage()), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    public ResponseEntity<ErrorDto> illegalArgument(IllegalArgumentException illegalArgumentException) {
+        return new ResponseEntity<>(new ErrorDto(illegalArgumentException.getLocalizedMessage()), HttpStatus.BAD_REQUEST);
+    }
+
 }

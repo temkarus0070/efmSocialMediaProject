@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Getter;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import org.temkarus0070.efmsocialmedia.security.dto.JwtAuthDto;
 
 
 @RestController
+@Tag(name = "API для аутентификации/регистрации", description = "Аутентификация, регистрация и все связанное с этим")
 public class AuthApi {
 
     @Operation(description = "вход в приложение под своим логином и паролем и получение токенов авторизации")

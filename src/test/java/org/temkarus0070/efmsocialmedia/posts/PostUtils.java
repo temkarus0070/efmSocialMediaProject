@@ -151,7 +151,7 @@ public class PostUtils {
                                                                                 postId)).content(objectMapper.writeValueAsString(
                                                         newImages.get(0))))
                                                     .andExpect(MockMvcResultMatchers.status()
-                                                                                    .isOk())
+                                                                                    .isCreated())
                                                     .andReturn()
                                                     .getResponse()
                                                     .getContentAsString();

@@ -5,6 +5,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,12 +22,17 @@ public class UserAccount {
 
     @Id
     @Column(unique = true)
+    @NotNull(message = "имя пользователя не может быть null")
+    @NotBlank(message = "имя пользователя не может быть пустым")
     private String username;
 
     @Column(unique = true)
+    @NotNull(message = "email не может быть null")
+    @NotBlank(message = "email не может быть пустым")
     private String email;
 
-    @JsonIgnore
+    @NotNull(message = "пароль не может быть null")
+    @NotBlank(message = "пароль не может быть пустым")
     private String password;
 
     @JsonIgnore

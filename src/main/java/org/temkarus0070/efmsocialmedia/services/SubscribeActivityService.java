@@ -8,7 +8,6 @@ import org.temkarus0070.efmsocialmedia.dto.PostDto;
 import org.temkarus0070.efmsocialmedia.repositories.PostRepository;
 import org.temkarus0070.efmsocialmedia.utils.PostUtils;
 
-import java.security.InvalidParameterException;
 import java.util.List;
 
 @Service
@@ -22,8 +21,8 @@ public class SubscribeActivityService {
 
     public Page<PostDto> getLastPosts(Pageable pageRequest) {
         if (pageRequest.getPageSize() > MAX_PAGE_SIZE) {
-            throw new InvalidParameterException(String.format("превышен максимальный размер страницы, максимальный размер =%d",
-                                                              MAX_PAGE_SIZE));
+            throw new IllegalArgumentException(String.format("превышен максимальный размер страницы, максимальный размер =%d",
+                                                             MAX_PAGE_SIZE));
         }
         List<String> subscribeUsernameList = userService.getSubscribeWithFriendsList();
         return postRepository.findAllByAuthor_UsernameIn(subscribeUsernameList, pageRequest)

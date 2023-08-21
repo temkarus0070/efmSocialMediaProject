@@ -67,6 +67,7 @@ public class SecurityConfig {
                        .anyRequest()
                        .authenticated();
             })
+            .anonymous(Customizer.withDefaults())
             .sessionManagement(AbstractHttpConfigurer::disable)
 
             .formLogin((options) -> {

@@ -12,7 +12,6 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DialogDto {
-
     private String friendUsername;
 
     @Override
