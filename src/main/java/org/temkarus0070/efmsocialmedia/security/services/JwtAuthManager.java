@@ -9,8 +9,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.stereotype.Component;
@@ -36,7 +34,6 @@ public class JwtAuthManager implements AuthenticationProvider {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         BearerTokenAuthenticationToken token = (BearerTokenAuthenticationToken) authentication;
-        try {
             Jwt decode = jwtDecoder.decode(token.getToken());
             String username = (String) decode.getClaimAsString("sub");
             Optional<UserAccount> userOptional = userAccountRepository.findById(username);
@@ -51,9 +48,7 @@ public class JwtAuthManager implements AuthenticationProvider {
             } else {
                 throw new UsernameNotFoundException("Пользователь с таким токеном не зарегистрирован");
             }
-        } catch (JwtException jwtException) {
-            throw new InvalidBearerTokenException("Неверное значение токена авторизации");
-        }
+
     }
 
 

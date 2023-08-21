@@ -3,12 +3,14 @@ package org.temkarus0070.efmsocialmedia.security.services;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
-import org.springframework.security.oauth2.jwt.*;
-import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
+import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.temkarus0070.efmsocialmedia.security.dto.JwtAuthDto;
-import org.temkarus0070.efmsocialmedia.security.exceptions.UserAlreadyRegistratedException;
 import org.temkarus0070.efmsocialmedia.security.persistence.entities.AuthToken;
 import org.temkarus0070.efmsocialmedia.security.persistence.entities.AuthTokenId;
 import org.temkarus0070.efmsocialmedia.security.persistence.entities.UserAccount;
@@ -39,7 +41,7 @@ public class RegistrationService {
             userAccountRepository.save(userAccount);
             return registrateToken(userAccount.getUsername());
         } else {
-            throw new UserAlreadyRegistratedException("пользователь с таким именем или почтой уже зарегистрирован");
+            throw new IllegalArgumentException("пользователь с таким именем или почтой уже зарегистрирован");
         }
     }
 
@@ -93,7 +95,7 @@ public class RegistrationService {
             tokenRepository.deleteById(oldAuthToken.getId());
             return newToken;
         } else {
-            throw new InvalidBearerTokenException("Неверное значение токена авторизации");
+            throw new IllegalArgumentException("Неизвестное значение токена авторизации");
         }
     }
 }

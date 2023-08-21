@@ -25,7 +25,6 @@ import org.temkarus0070.efmsocialmedia.security.services.JwtAuthManager;
 import org.temkarus0070.efmsocialmedia.security.services.RegistrationService;
 
 import java.io.IOException;
-import java.util.Set;
 
 @Configuration
 @EnableTransactionManagement(order = 0)
@@ -97,24 +96,17 @@ public class SecurityConfig {
 
     private void writeExceptionWhenAuthErrors(HttpServletRequest request, HttpServletResponse response, Exception authException)
         throws IOException, ServletException {
-        Set<String> authUrls = Set.of("/auth/registrate", "/auth/refresh-token", "/login");
-        String requestPath = request.getPathInfo();
-        if (authUrls.contains(requestPath)) {
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setStatus(401);
-            response.setCharacterEncoding("UTF-8");
-            objectMapper.writeValue(response.getWriter(), new ErrorDto(authException.getLocalizedMessage()));
-        } else if (authException.getClass()
-                                .equals(AccessDeniedException.class)) {
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setStatus(403);
-            response.setCharacterEncoding("UTF-8");
-            objectMapper.writeValue(response.getWriter(), new ErrorDto(authException.getLocalizedMessage()));
+    if (authException.getClass()
+                     .equals(AccessDeniedException.class)) {
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(403);
+        response.setCharacterEncoding("UTF-8");
+        objectMapper.writeValue(response.getWriter(), new ErrorDto(authException.getLocalizedMessage()));
 
-        } else if (authException.getClass()
-                                .equals(InsufficientAuthenticationException.class)) {
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setStatus(401);
+    } else if (authException.getClass()
+                            .equals(InsufficientAuthenticationException.class)) {
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(401);
             response.setCharacterEncoding("UTF-8");
             objectMapper.writeValue(response.getWriter(), new ErrorDto(authException.getLocalizedMessage()));
         }
