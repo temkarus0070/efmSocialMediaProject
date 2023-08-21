@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -27,7 +28,7 @@ public class ControllerErrorsAdvice {
 
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorDto> others(MethodArgumentNotValidException exception) {
+    public ResponseEntity<ErrorDto> validation(MethodArgumentNotValidException exception) {
         return new ResponseEntity<>(new ErrorDto(exception.getFieldErrors()
                                                           .stream()
                                                           .map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -35,8 +36,13 @@ public class ControllerErrorsAdvice {
     }
 
     @ExceptionHandler(value = AuthenticationException.class)
-    public ResponseEntity<ErrorDto> others(AuthenticationException exception) {
+    public ResponseEntity<ErrorDto> auth(AuthenticationException exception) {
         return new ResponseEntity<>(new ErrorDto(exception.getLocalizedMessage()), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(value = AccessDeniedException.class)
+    public ResponseEntity<ErrorDto> accessDenied(AccessDeniedException exception) {
+        return new ResponseEntity<>(new ErrorDto(exception.getLocalizedMessage()), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(value = Throwable.class)
