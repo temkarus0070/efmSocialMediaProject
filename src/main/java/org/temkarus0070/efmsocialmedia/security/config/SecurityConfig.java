@@ -8,13 +8,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -83,9 +83,9 @@ public class SecurityConfig {
                 });
             })
             .exceptionHandling((exceptions) -> {
-                exceptions.accessDeniedHandler(this::writeExceptionWhenBadRequest);
+                exceptions.accessDeniedHandler(this::writeExceptionWhenAuthErrors);
 
-                exceptions.authenticationEntryPoint(this::writeExceptionWhenBadRequest);
+                exceptions.authenticationEntryPoint(this::writeExceptionWhenAuthErrors);
             })
             .oauth2ResourceServer((resourceServer) -> resourceServer.jwt(Customizer.withDefaults()))
             .authenticationManager(new ProviderManager(jwtAuthManager,
@@ -94,13 +94,13 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private void writeExceptionWhenBadRequest(HttpServletRequest request, HttpServletResponse response, Exception authException)
+    private void writeExceptionWhenAuthErrors(HttpServletRequest request, HttpServletResponse response, Exception authException)
         throws IOException, ServletException {
         Set<String> authUrls = Set.of("/auth/registrate", "/auth/refresh-token", "/login");
         String requestPath = request.getPathInfo();
         if (authUrls.contains(requestPath)) {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setStatus(400);
+            response.setStatus(401);
             response.setCharacterEncoding("UTF-8");
             objectMapper.writeValue(response.getWriter(), new ErrorDto(authException.getLocalizedMessage()));
         } else if (authException.getClass()
@@ -111,7 +111,7 @@ public class SecurityConfig {
             objectMapper.writeValue(response.getWriter(), new ErrorDto(authException.getLocalizedMessage()));
 
         } else if (authException.getClass()
-                                .equals(AuthenticationException.class)) {
+                                .equals(InsufficientAuthenticationException.class)) {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setStatus(401);
             response.setCharacterEncoding("UTF-8");

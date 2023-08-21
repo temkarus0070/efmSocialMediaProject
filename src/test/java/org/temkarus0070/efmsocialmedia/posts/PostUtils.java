@@ -46,6 +46,11 @@ public class PostUtils {
                                                .isOk());
 
         PostDto finalPostDto = postDto;
+
+        assert finalPostDto.getImages()
+                           .stream()
+                           .anyMatch(e -> e.getId() == imageId);
+
         mockMvc.perform(get(String.format("/post/%d", postId)))
                .andExpect(MockMvcResultMatchers.status()
                                                .isOk())
@@ -75,10 +80,6 @@ public class PostUtils {
                                                                          .noneMatch(e -> e.getId() == imageId);
                                                    }
                                                }));
-
-        assert finalPostDto.getImages()
-                           .stream()
-                           .anyMatch(e -> e.getId() == imageId);
 
     }
 
